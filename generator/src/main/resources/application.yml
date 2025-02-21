@@ -1,0 +1,4 @@
+spring:
+  autoconfigure:
+    # 排除数据库自动配置类
+    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
