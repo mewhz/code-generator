@@ -1,5 +1,6 @@
 package com.mewhz.demo.model;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -7,6 +8,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * operation_log 表对应的实体类
@@ -14,6 +16,8 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@TableName("operation_log")
+@Schema(description = "operation_log 实体")
 public class OperationLog implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -27,46 +31,56 @@ public class OperationLog implements Serializable {
     /**
      * 操作名称
      */
+    @Schema(description = "操作名称")
     private String title;
 
     /**
      * 方法名称
      */
+    @Schema(description = "方法名称")
     private String method;
 
     /**
      * 请求方式
      */
+    @Schema(description = "请求方式")
     private String requestMethod;
 
     /**
      * 操作URL
      */
+    @Schema(description = "操作URL")
     private String operationUrl;
 
     /**
      * 请求参数
      */
+    @Schema(description = "请求参数")
     private String requestParam;
 
     /**
      * 响应结果
      */
+    @Schema(description = "响应结果")
     private String responseResult;
 
     /**
      * 错误信息
      */
+    @Schema(description = "错误信息")
     private String errorMessage;
 
     /**
      * 操作时间
      */
+    @Schema(description = "操作时间")
     private LocalDateTime operationTime;
 
     /**
      * 消耗时间
      */
+    @Schema(description = "消耗时间")
     private Long costTime;
+
 
 }

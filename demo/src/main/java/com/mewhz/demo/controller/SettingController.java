@@ -1,8 +1,8 @@
 package com.mewhz.demo.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.mewhz.demo.model.OperationLog;
-import com.mewhz.demo.service.OperationLogService;
+import com.mewhz.demo.model.Setting;
+import com.mewhz.demo.service.SettingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,27 +10,27 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * operation_log 表对应的 Controller
+ * setting 表对应的 Controller
  */
 @RestController
-@RequestMapping("/operationLog")
+@RequestMapping("/setting")
 @RequiredArgsConstructor
-@Tag(name = "operation_log 接口")
-public class OperationLogController {
+@Tag(name = "setting 接口")
+public class SettingController {
 
-    private final OperationLogService operationLogService;
+    private final SettingService settingService;
 
     /**
      * 分页查询列表
      */
     @GetMapping("/page")
     @Operation(summary = "分页查询列表")
-    public Page<OperationLog> queryPage(
+    public Page<Setting> queryPage(
             @Parameter(description = "当前页码") 
             @RequestParam(value = "current", defaultValue = "1") Long current,
             @Parameter(description = "每页大小") 
             @RequestParam(value = "size", defaultValue = "10") Long size) {
-        return operationLogService.queryPage(current, size);
+        return settingService.queryPage(current, size);
     }
 
     /**
@@ -38,10 +38,10 @@ public class OperationLogController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID查询")
-    public OperationLog queryById(
+    public Setting queryById(
             @Parameter(description = "ID") 
             @PathVariable Long id) {
-        return operationLogService.queryById(id);
+        return settingService.queryById(id);
     }
 
     /**
@@ -51,8 +51,8 @@ public class OperationLogController {
     @Operation(summary = "新增数据")
     public boolean insert(
             @Parameter(description = "实体对象") 
-            @RequestBody OperationLog operationLog) {
-        return operationLogService.insert(operationLog);
+            @RequestBody Setting setting) {
+        return settingService.insert(setting);
     }
 
     /**
@@ -62,8 +62,8 @@ public class OperationLogController {
     @Operation(summary = "修改数据")
     public boolean update(
             @Parameter(description = "实体对象") 
-            @RequestBody OperationLog operationLog) {
-        return operationLogService.update(operationLog);
+            @RequestBody Setting setting) {
+        return settingService.update(setting);
     }
 
     /**
@@ -74,6 +74,6 @@ public class OperationLogController {
     public boolean delete(
             @Parameter(description = "ID") 
             @PathVariable Long id) {
-        return operationLogService.delete(id);
+        return settingService.delete(id);
     }
 } 
