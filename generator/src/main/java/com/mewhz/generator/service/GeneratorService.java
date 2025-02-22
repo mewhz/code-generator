@@ -5,6 +5,7 @@ import cn.hutool.extra.template.Template;
 import cn.hutool.extra.template.TemplateConfig;
 import cn.hutool.extra.template.TemplateEngine;
 import cn.hutool.extra.template.TemplateUtil;
+import com.mewhz.generator.model.dto.GeneratorConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.datasource.DataSourceHolder;
 import org.anyline.metadata.Column;
@@ -48,6 +49,13 @@ public class GeneratorService {
         } catch (Exception e) {
             log.error("数据库连接测试失败", e);
             throw new RuntimeException("数据库连接失败：" + e.getMessage());
+        } finally {
+            try {
+                // 销毁数据源
+                DataSourceHolder.destroy(tempDataSource);
+            } catch (Exception e) {
+                log.error("关闭数据源失败", e);
+            }
         }
     }
 
@@ -55,9 +63,9 @@ public class GeneratorService {
      * 生成代码并返回ZIP文件的字节数组
      */
     public byte[] generateCode(DatabaseConfigDTO config) {
+        String tempDataSource = "temp_" + System.currentTimeMillis();
         try {
             // 注册数据源
-            String tempDataSource = "temp_" + System.currentTimeMillis();
             DataSourceHolder.reg(tempDataSource,
                     "com.zaxxer.hikari.HikariDataSource",
                     "com.mysql.cj.jdbc.Driver",
@@ -72,7 +80,7 @@ public class GeneratorService {
             // 获取数据库表结构信息并生成代码
             for (String tableName : config.getTables()) {
                 Table<?> table = ServiceProxy.service(tempDataSource).metadata().table(tableName);
-                generateCodeForTable(table, tempDir);
+                generateCodeForTable(table, tempDir, config.getGeneratorConfig());
             }
 
             // 将生成的文件打包成ZIP
@@ -85,15 +93,20 @@ public class GeneratorService {
         } catch (Exception e) {
             log.error("代码生成失败", e);
             throw new RuntimeException("代码生成失败：" + e.getMessage());
+        } finally {
+            try {
+                // 销毁并移除数据源
+                DataSourceHolder.destroy(tempDataSource);
+            } catch (Exception e) {
+                log.error("关闭数据源失败", e);
+            }
         }
     }
 
-    private void generateCodeForTable(Table<?> table, File outputDir) throws IOException {
+    private void generateCodeForTable(Table<?> table, File outputDir, GeneratorConfig config) throws IOException {
         // 获取表的所有列信息并转换类型
         List<Dict> columns = new ArrayList<>();
         table.getColumns().values().forEach(column -> {
-
-            System.out.println("column.isPrimaryKey() = " + column.isPrimaryKey());
 
             Dict columnInfo = Dict.create()
                     .set("name", toCamelCase(column.getName()))
@@ -103,8 +116,6 @@ public class GeneratorService {
                     .set("nullable", column.isNullable())
                     .set("primaryKey", column.isPrimaryKey() == 1)
                     .set("typeName", column.getTypeName());
-
-            System.out.println("columnInfo = " + columnInfo);
 
             columns.add(columnInfo);
         });
@@ -117,7 +128,8 @@ public class GeneratorService {
                 .set("package", basePackage)
                 .set("className", convertToCamelCase(table.getName()))
                 .set("tableName", table.getName())
-                .set("columns", columns);
+                .set("columns", columns)
+                .set("config", config);
 
         // 初始化模板引擎
         TemplateEngine engine = TemplateUtil.createEngine(new TemplateConfig("templates", TemplateConfig.ResourceMode.CLASSPATH));

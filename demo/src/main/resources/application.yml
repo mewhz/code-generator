@@ -11,3 +11,9 @@ mybatis-plus:
   configuration:
     # 如果项目无日志框架，可以考虑指定为 org.apache.ibatis.logging.stdout.StdOutImpl (请勿在实际生产中使用).
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+springdoc:
+  default-flat-param-object: true # Springdoc 会将对象的属性作为单独的参数列出
+
+knife4j:
+  enable: true

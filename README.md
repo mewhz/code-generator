@@ -1,0 +1,11 @@
+### 更新记录
+ - v1.0.0 -2025-02-21
+   - 根据数据库信息生成 CRUD
+   - 默认使用 MyBatis-Plus、Lombok
+   - 生成 controller、service、mapper 和 model
+   - 生成 MyBatis-Plus 的 Config 配置文件
+ - v1.1.0-2025-02-23
+   - 注销已经使用过的数据源
+   - 新增是否启用 Lombok
+   - 下载文件名修改为包含时间戳
+   - 新增 是否启用 Knife4j

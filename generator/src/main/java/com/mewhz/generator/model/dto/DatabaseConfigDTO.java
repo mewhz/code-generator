@@ -12,5 +12,5 @@ public class DatabaseConfigDTO {
     private List<String> tables;
     
     // 代码生成配置
-    private GeneratorConfig config;
+    private GeneratorConfig generatorConfig;
 }

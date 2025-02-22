@@ -1,15 +1,7 @@
 <template>
   <div class="database-config">
     <el-container class="main-container">
-      <el-header>
-        <div class="header-content">
-          <h1>代码生成器</h1>
-          <!-- <el-menu mode="horizontal" :router="true">
-            <el-menu-item index="/">首页</el-menu-item>
-            <el-menu-item index="/database">数据库配置</el-menu-item>
-          </el-menu> -->
-        </div>
-      </el-header>
+      <app-header />
       
       <el-main>
         <el-card class="config-card">
@@ -28,7 +20,7 @@
           >
             <el-form-item label="数据库地址" required class="db-address-container">
               <el-row :gutter="20" class="db-address-row">
-                <el-col :span="8" style="padding-left: 0px">
+                <el-col :span="12" style="padding-left: 0px">
                   <el-form-item prop="host" class="mb-0">
                     <el-input v-model="formData.host" placeholder="主机地址">
                       <template #prepend>
@@ -45,12 +37,12 @@
                     </el-input>
                   </el-form-item>
                 </el-col>
-                <el-col :span="6">
+                <el-col :span="4">
                   <el-form-item prop="port" class="mb-0">
                     <el-input v-model="formData.port" placeholder="端口号" @change="updateUrl" />
                   </el-form-item>
                 </el-col>
-                <el-col :span="10" style="padding-right: 0px">
+                <el-col :span="8" style="padding-right: 0px">
                   <el-form-item prop="database" class="mb-0">
                     <el-input v-model="formData.database" placeholder="数据库名" @change="updateUrl" />
                   </el-form-item>
@@ -85,16 +77,6 @@
               </el-select>
             </el-form-item>
 
-            <el-divider content-position="left">代码生成配置</el-divider>
-            
-            <el-form-item label="Lombok">
-              <el-switch
-                v-model="formData.config.enableLombok"
-                active-text="启用"
-                inactive-text="禁用"
-              />
-            </el-form-item>
-
             <el-form-item>
               <el-button type="primary" @click="onSubmit">生成代码</el-button>
               <el-button 
@@ -121,12 +103,9 @@ import { ref, reactive } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
+import AppHeader from '@/components/AppHeader.vue'
 
 const formRef = ref<FormInstance>()
-
-interface GeneratorConfig {
-  enableLombok: boolean;
-}
 
 interface DatabaseConfig {
   dbType: string
@@ -137,7 +116,6 @@ interface DatabaseConfig {
   host: string
   port: string
   database: string
-  config: GeneratorConfig
 }
 
 const formData = reactive({
@@ -149,9 +127,6 @@ const formData = reactive({
   host: 'localhost',
   port: '3306',
   database: '',
-  config: {
-    enableLombok: true
-  }
 })
 
 const tableList = ref<string[]>([])
@@ -205,6 +180,15 @@ const onSubmit = async () => {
         // 确保URL是最新的
         updateUrl()
         
+        // 从本地存储获取生成器配置
+        const savedConfig = localStorage.getItem('generator-config')
+        const generatorConfig = savedConfig ? JSON.parse(savedConfig) : {
+          enableLombok: false,
+          enableKnife4j: false,
+          enableValidation: false,
+          enableMapStruct: false
+        }
+        
         const config: DatabaseConfig = {
           dbType: formData.dbType,
           url: formData.url,
@@ -214,22 +198,15 @@ const onSubmit = async () => {
           host: formData.host,
           port: formData.port,
           database: formData.database,
-          config: formData.config
         }
 
-        const response = await axios.post('/api/generator/generate', config, {
-          responseType: 'blob'
-        })
+        // 合并数据库配置和生成器配置
+        const finalConfig = {
+          ...config,
+          generatorConfig
+        }
 
-        const blob = new Blob([response.data], { type: 'application/zip' })
-        const url = window.URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = 'generated-code.zip'
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        window.URL.revokeObjectURL(url)
+        const response = await axios.post('/api/generator/generate', finalConfig);
 
         ElMessage.success('代码生成成功')
       } catch (error: any) {
@@ -254,7 +231,6 @@ const testConnection = async () => {
       host: formData.host,
       port: formData.port,
       database: formData.database,
-      config: formData.config
     }
 
     const response = await axios.post('/api/generator/test-connection', config)
@@ -290,31 +266,6 @@ const resetForm = () => {
   height: 100%;
   display: flex;
   flex-direction: column;
-}
-
-.el-header {
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, .12);
-  padding: 0;
-  height: 60px;
-  position: relative;
-  z-index: 10;
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-}
-
-.header-content h1 {
-  margin: 0;
-  font-size: 24px;
-  color: #409EFF;
 }
 
 .el-main {
@@ -463,7 +414,7 @@ const resetForm = () => {
 
 /* 调整下拉选择器样式 */
 .db-type-select {
-  width: 110px !important;
+  width: 150px !important;
 }
 
 :deep(.el-input-group__prepend) {
@@ -495,17 +446,6 @@ const resetForm = () => {
 /* 移除底部边距 */
 .mb-0 {
   margin-bottom: 0 !important;
-}
-
-/* 隐藏选中项的对勾图标 */
-:deep(.db-type-select-dropdown .el-select-dropdown__item.selected::after) {
-  display: none !important;
-}
-
-/* 调整选中项的样式 */
-:deep(.db-type-select-dropdown .el-select-dropdown__item.selected) {
-  font-weight: bold;
-  color: var(--el-color-primary);
 }
 
 .el-divider {

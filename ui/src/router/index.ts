@@ -1,14 +1,21 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import DatabaseConfig from '@/views/DatabaseConfig.vue'
+import GeneratorConfig from '@/views/GeneratorConfig.vue'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes: [
     {
       path: '/',
-      name: 'database',
-      component: () => import('../views/DatabaseConfig.vue'),
+      name: 'home',
+      component: DatabaseConfig
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: GeneratorConfig
     }
-  ],
+  ]
 })
 
 export default router

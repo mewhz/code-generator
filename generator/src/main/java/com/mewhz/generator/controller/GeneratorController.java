@@ -47,7 +47,10 @@ public class GeneratorController {
         
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        headers.setContentDispositionFormData("attachment", "generated-code.zip");
+        // 生成带时间戳的文件名
+        String timestamp = LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String fileName = String.format("generated-code-%s.zip", timestamp);
+        headers.setContentDispositionFormData("attachment", fileName);
         
         return new ResponseEntity<>(zipFile, headers, HttpStatus.OK);
     }

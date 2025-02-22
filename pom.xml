@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mewhz</groupId>
     <artifactId>code-generator</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <packaging>pom</packaging>
     <name>code-generator</name>
     <description>code-generator</description>
@@ -22,6 +22,7 @@
         <hutool-all.version>5.8.26</hutool-all.version>
         <mybatis-plus-version>3.5.7</mybatis-plus-version>
         <anyline-version>8.7.2-20241022</anyline-version>
+        <knife4j-version>4.4.0</knife4j-version>
     </properties>
 
     <dependencyManagement>
@@ -56,7 +57,13 @@
             <dependency>
                 <groupId>org.anyline</groupId>
                 <artifactId>anyline-data-jdbc-mysql</artifactId>
-                <version>8.7.2-20241022</version>
+                <version>${anyline-version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.xiaoymin</groupId>
+                <artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
+                <version>${knife4j-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
