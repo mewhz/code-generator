@@ -3,7 +3,12 @@ package ${package}.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import ${package}.model.${className};
 import ${package}.service.${className}Service;
+<#if config.enableResult>
+import ${package}.common.Result;
+</#if>
+<#if config.enableLombok>
 import lombok.RequiredArgsConstructor;
+</#if>
 import org.springframework.web.bind.annotation.*;
 <#if config.enableKnife4j>
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,13 +21,21 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  */
 @RestController
 @RequestMapping("/${className?uncap_first}")
+<#if config.enableLombok>
 @RequiredArgsConstructor
+</#if>
 <#if config.enableKnife4j>
 @Tag(name = "${tableName} 接口")
 </#if>
 public class ${className}Controller {
 
     private final ${className}Service ${className?uncap_first}Service;
+
+    <#if !config.enableLombok>
+    public ${className}Controller(${className}Service ${className?uncap_first}Service) {
+        this.${className?uncap_first}Service = ${className?uncap_first}Service;
+    }
+    </#if>
 
     /**
      * 分页查询列表
@@ -31,7 +44,11 @@ public class ${className}Controller {
     <#if config.enableKnife4j>
     @Operation(summary = "分页查询列表")
     </#if>
+    <#if config.enableResult>
+    public Result<Page<${className}>> queryPage(
+    <#else>
     public Page<${className}> queryPage(
+    </#if>
             <#if config.enableKnife4j>
             @Parameter(description = "当前页码") 
             </#if>
@@ -40,7 +57,11 @@ public class ${className}Controller {
             @Parameter(description = "每页大小") 
             </#if>
             @RequestParam(value = "size", defaultValue = "10") Long size) {
+        <#if config.enableResult>
+        return Result.success(${className?uncap_first}Service.queryPage(current, size));
+        <#else>
         return ${className?uncap_first}Service.queryPage(current, size);
+        </#if>
     }
 
     /**
@@ -50,12 +71,12 @@ public class ${className}Controller {
     <#if config.enableKnife4j>
     @Operation(summary = "根据ID查询")
     </#if>
-    public ${className} queryById(
+    public Result<${className}> queryById(
             <#if config.enableKnife4j>
             @Parameter(description = "ID") 
             </#if>
             @PathVariable Long id) {
-        return ${className?uncap_first}Service.queryById(id);
+        return Result.success(${className?uncap_first}Service.queryById(id));
     }
 
     /**
@@ -65,12 +86,12 @@ public class ${className}Controller {
     <#if config.enableKnife4j>
     @Operation(summary = "新增数据")
     </#if>
-    public boolean insert(
+    public Result<Boolean> insert(
             <#if config.enableKnife4j>
             @Parameter(description = "实体对象") 
             </#if>
             @RequestBody ${className} ${className?uncap_first}) {
-        return ${className?uncap_first}Service.insert(${className?uncap_first});
+        return Result.success(${className?uncap_first}Service.insert(${className?uncap_first}));
     }
 
     /**
@@ -80,12 +101,12 @@ public class ${className}Controller {
     <#if config.enableKnife4j>
     @Operation(summary = "修改数据")
     </#if>
-    public boolean update(
+    public Result<Boolean> update(
             <#if config.enableKnife4j>
             @Parameter(description = "实体对象") 
             </#if>
             @RequestBody ${className} ${className?uncap_first}) {
-        return ${className?uncap_first}Service.update(${className?uncap_first});
+        return Result.success(${className?uncap_first}Service.update(${className?uncap_first}));
     }
 
     /**
@@ -95,11 +116,11 @@ public class ${className}Controller {
     <#if config.enableKnife4j>
     @Operation(summary = "删除数据")
     </#if>
-    public boolean delete(
+    public Result<Boolean> delete(
             <#if config.enableKnife4j>
             @Parameter(description = "ID") 
             </#if>
             @PathVariable Long id) {
-        return ${className?uncap_first}Service.delete(id);
+        return Result.success(${className?uncap_first}Service.delete(id));
     }
 } 

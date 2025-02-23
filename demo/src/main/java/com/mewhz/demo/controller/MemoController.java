@@ -3,6 +3,7 @@ package com.mewhz.demo.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mewhz.demo.model.Memo;
 import com.mewhz.demo.service.MemoService;
+import com.mewhz.demo.common.Result;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,17 +21,18 @@ public class MemoController {
 
     private final MemoService memoService;
 
+
     /**
      * 分页查询列表
      */
     @GetMapping("/page")
     @Operation(summary = "分页查询列表")
-    public Page<Memo> queryPage(
+    public Result<Page<Memo>> queryPage(
             @Parameter(description = "当前页码") 
             @RequestParam(value = "current", defaultValue = "1") Long current,
             @Parameter(description = "每页大小") 
             @RequestParam(value = "size", defaultValue = "10") Long size) {
-        return memoService.queryPage(current, size);
+        return Result.success(memoService.queryPage(current, size));
     }
 
     /**
@@ -38,10 +40,10 @@ public class MemoController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID查询")
-    public Memo queryById(
+    public Result<Memo> queryById(
             @Parameter(description = "ID") 
             @PathVariable Long id) {
-        return memoService.queryById(id);
+        return Result.success(memoService.queryById(id));
     }
 
     /**
@@ -49,10 +51,10 @@ public class MemoController {
      */
     @PostMapping
     @Operation(summary = "新增数据")
-    public boolean insert(
+    public Result<Boolean> insert(
             @Parameter(description = "实体对象") 
             @RequestBody Memo memo) {
-        return memoService.insert(memo);
+        return Result.success(memoService.insert(memo));
     }
 
     /**
@@ -60,10 +62,10 @@ public class MemoController {
      */
     @PutMapping
     @Operation(summary = "修改数据")
-    public boolean update(
+    public Result<Boolean> update(
             @Parameter(description = "实体对象") 
             @RequestBody Memo memo) {
-        return memoService.update(memo);
+        return Result.success(memoService.update(memo));
     }
 
     /**
@@ -71,9 +73,9 @@ public class MemoController {
      */
     @DeleteMapping("/{id}")
     @Operation(summary = "删除数据")
-    public boolean delete(
+    public Result<Boolean> delete(
             @Parameter(description = "ID") 
             @PathVariable Long id) {
-        return memoService.delete(id);
+        return Result.success(memoService.delete(id));
     }
 } 

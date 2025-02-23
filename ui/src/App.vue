@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
+import { onMounted } from 'vue'
+
+onMounted(() => {
+  document.title = '代码生成器'
+})
 </script>
 
 <template>

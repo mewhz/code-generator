@@ -17,6 +17,7 @@ public class MemoServiceImpl implements MemoService {
     
     private final MemoMapper memoMapper;
     
+    
     @Override
     public Page<Memo> queryPage(Long current, Long size) {
         // 创建分页对象

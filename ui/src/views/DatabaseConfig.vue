@@ -183,10 +183,10 @@ const onSubmit = async () => {
         // 从本地存储获取生成器配置
         const savedConfig = localStorage.getItem('generator-config')
         const generatorConfig = savedConfig ? JSON.parse(savedConfig) : {
-          enableLombok: false,
+          enableLombok: true,
           enableKnife4j: false,
           enableValidation: false,
-          enableMapStruct: false
+          enableResult: true
         }
         
         const config: DatabaseConfig = {

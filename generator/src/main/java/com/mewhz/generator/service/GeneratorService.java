@@ -62,25 +62,25 @@ public class GeneratorService {
     /**
      * 生成代码并返回ZIP文件的字节数组
      */
-    public byte[] generateCode(DatabaseConfigDTO config) {
+    public byte[] generateCode(DatabaseConfigDTO databaseConfigDTO) {
         String tempDataSource = "temp_" + System.currentTimeMillis();
         try {
             // 注册数据源
             DataSourceHolder.reg(tempDataSource,
                     "com.zaxxer.hikari.HikariDataSource",
                     "com.mysql.cj.jdbc.Driver",
-                    config.getUrl(),
-                    config.getUsername(),
-                    config.getPassword());
+                    databaseConfigDTO.getUrl(),
+                    databaseConfigDTO.getUsername(),
+                    databaseConfigDTO.getPassword());
 
             // 创建一个临时目录存放生成的文件
             File tempDir = new File("temp_generated_code");
             tempDir.mkdir();
 
             // 获取数据库表结构信息并生成代码
-            for (String tableName : config.getTables()) {
+            for (String tableName : databaseConfigDTO.getTables()) {
                 Table<?> table = ServiceProxy.service(tempDataSource).metadata().table(tableName);
-                generateCodeForTable(table, tempDir, config.getGeneratorConfig());
+                generateCodeForTable(table, tempDir, databaseConfigDTO);
             }
 
             // 将生成的文件打包成ZIP
@@ -103,7 +103,10 @@ public class GeneratorService {
         }
     }
 
-    private void generateCodeForTable(Table<?> table, File outputDir, GeneratorConfig config) throws IOException {
+    private void generateCodeForTable(Table<?> table, File outputDir, DatabaseConfigDTO databaseConfigDTO) throws IOException {
+
+        GeneratorConfig config = databaseConfigDTO.getGeneratorConfig();
+
         // 获取表的所有列信息并转换类型
         List<Dict> columns = new ArrayList<>();
         table.getColumns().values().forEach(column -> {
@@ -129,7 +132,11 @@ public class GeneratorService {
                 .set("className", convertToCamelCase(table.getName()))
                 .set("tableName", table.getName())
                 .set("columns", columns)
-                .set("config", config);
+                .set("config", config)
+                .set("dbType", databaseConfigDTO.getDbType())
+                .set("url", databaseConfigDTO.getUrl())
+                .set("username", databaseConfigDTO.getUsername())
+                .set("password", databaseConfigDTO.getPassword());
 
         // 初始化模板引擎
         TemplateEngine engine = TemplateUtil.createEngine(new TemplateConfig("templates", TemplateConfig.ResourceMode.CLASSPATH));
@@ -142,6 +149,9 @@ public class GeneratorService {
         templateConfig.put("serviceImpl.ftl", "/service/impl");
         templateConfig.put("controller.ftl", "/controller");
         templateConfig.put("config.ftl", "/config");
+        templateConfig.put("result.ftl", "/common");
+        templateConfig.put("application.ftl", "");  // 放在根目录
+        templateConfig.put("application-class.ftl", "");  // 放在根包路径下
 
         // 生成所有需要的文件
         for (Map.Entry<String, String> entry : templateConfig.entrySet()) {
@@ -154,13 +164,21 @@ public class GeneratorService {
         Template template = engine.getTemplate(templateName);
         String result = template.render(dict);
 
-        System.out.println("result = " + result);
-
         String fileName = getFileName(templateName, table.getName());
-        String targetDir = outputDir.getPath() + File.separator + basePackagePath + packagePath;
+        String targetDir;
+        String targetFile;
+        
+        if (templateName.equals("application.ftl")) {
+            // 配置文件放在 resources 目录下
+            targetDir = outputDir.getPath() + File.separator + "resources";
+            targetFile = targetDir + File.separator + fileName + ".yml";
+        } else {
+            // 其他Java文件放在对应包路径下
+            targetDir = outputDir.getPath() + File.separator + "java" + File.separator + basePackagePath + packagePath;
+            targetFile = targetDir + File.separator + fileName + ".java";
+        }
         
         new File(targetDir).mkdirs();
-        String targetFile = targetDir + File.separator + fileName + ".java";
         
         try (FileWriter writer = new FileWriter(targetFile)) {
             writer.write(result);
@@ -220,6 +238,12 @@ public class GeneratorService {
             }
         } else if (templateName.equals("config.ftl")) {
             fileName = "MybatisPlusConfig";
+        } else if (templateName.equals("result.ftl")) {
+            fileName = "Result";
+        } else if (templateName.equals("application.ftl")) {
+            fileName = "application";
+        } else if (templateName.equals("application-class.ftl")) {
+            fileName = "DemoApplication";
         } else if (!templateName.equals("model.ftl")) {
             fileName += templateName.substring(0, templateName.indexOf(".")).substring(0, 1).toUpperCase() 
                     + templateName.substring(0, templateName.indexOf(".")).substring(1);

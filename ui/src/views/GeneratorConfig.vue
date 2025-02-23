@@ -17,37 +17,36 @@
             label-width="120px"
             status-icon
           >
-            <el-form-item label="Lombok">
-              <el-switch
-                v-model="formData.enableLombok"
-                active-text="启用"
-                inactive-text="禁用"
-              />
-            </el-form-item>
-
-            <el-form-item label="Knife4j">
-              <el-switch
-                v-model="formData.enableKnife4j"
-                active-text="启用"
-                inactive-text="禁用"
-              />
-            </el-form-item>
-
-            <el-form-item label="数据校验">
-              <el-switch
-                v-model="formData.enableValidation"
-                active-text="启用"
-                inactive-text="禁用"
-              />
-            </el-form-item>
-
-            <el-form-item label="MapStruct">
-              <el-switch
-                v-model="formData.enableMapStruct"
-                active-text="启用"
-                inactive-text="禁用"
-              />
-            </el-form-item>
+            <el-row :gutter="20">
+              <el-col :span="6">
+                <el-form-item label="Lombok">
+                  <el-switch
+                    v-model="formData.enableLombok"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="Knife4j">
+                  <el-switch
+                    v-model="formData.enableKnife4j"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="数据校验">
+                  <el-switch
+                    v-model="formData.enableValidation"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-form-item label="Result">
+                  <el-switch
+                    v-model="formData.enableResult"
+                  />
+                </el-form-item>
+              </el-col>
+            </el-row>
 
             <el-form-item>
               <el-button type="primary" @click="saveConfig">保存设置</el-button>
@@ -74,10 +73,10 @@ const formRef = ref<FormInstance>()
 const STORAGE_KEY = 'generator-config'
 
 const defaultFormData = {
-  enableLombok: false,
+  enableLombok: true,
   enableKnife4j: false,
   enableValidation: false,
-  enableMapStruct: false
+  enableResult: true
 }
 
 const formData = reactive({

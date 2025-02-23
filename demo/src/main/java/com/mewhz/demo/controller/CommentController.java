@@ -3,6 +3,7 @@ package com.mewhz.demo.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mewhz.demo.model.Comment;
 import com.mewhz.demo.service.CommentService;
+import com.mewhz.demo.common.Result;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,17 +21,18 @@ public class CommentController {
 
     private final CommentService commentService;
 
+
     /**
      * 分页查询列表
      */
     @GetMapping("/page")
     @Operation(summary = "分页查询列表")
-    public Page<Comment> queryPage(
+    public Result<Page<Comment>> queryPage(
             @Parameter(description = "当前页码") 
             @RequestParam(value = "current", defaultValue = "1") Long current,
             @Parameter(description = "每页大小") 
             @RequestParam(value = "size", defaultValue = "10") Long size) {
-        return commentService.queryPage(current, size);
+        return Result.success(commentService.queryPage(current, size));
     }
 
     /**
@@ -38,10 +40,10 @@ public class CommentController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID查询")
-    public Comment queryById(
+    public Result<Comment> queryById(
             @Parameter(description = "ID") 
             @PathVariable Long id) {
-        return commentService.queryById(id);
+        return Result.success(commentService.queryById(id));
     }
 
     /**
@@ -49,10 +51,10 @@ public class CommentController {
      */
     @PostMapping
     @Operation(summary = "新增数据")
-    public boolean insert(
+    public Result<Boolean> insert(
             @Parameter(description = "实体对象") 
             @RequestBody Comment comment) {
-        return commentService.insert(comment);
+        return Result.success(commentService.insert(comment));
     }
 
     /**
@@ -60,10 +62,10 @@ public class CommentController {
      */
     @PutMapping
     @Operation(summary = "修改数据")
-    public boolean update(
+    public Result<Boolean> update(
             @Parameter(description = "实体对象") 
             @RequestBody Comment comment) {
-        return commentService.update(comment);
+        return Result.success(commentService.update(comment));
     }
 
     /**
@@ -71,9 +73,9 @@ public class CommentController {
      */
     @DeleteMapping("/{id}")
     @Operation(summary = "删除数据")
-    public boolean delete(
+    public Result<Boolean> delete(
             @Parameter(description = "ID") 
             @PathVariable Long id) {
-        return commentService.delete(id);
+        return Result.success(commentService.delete(id));
     }
 } 

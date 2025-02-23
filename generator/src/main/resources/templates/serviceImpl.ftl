@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import ${package}.mapper.${className}Mapper;
 import ${package}.model.${className};
 import ${package}.service.${className}Service;
+<#if config.enableLombok>
 import lombok.RequiredArgsConstructor;
+</#if>
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,10 +14,18 @@ import org.springframework.transaction.annotation.Transactional;
  * ${tableName} 表对应的 Service 实现类
  */
 @Service
+<#if config.enableLombok>
 @RequiredArgsConstructor
+</#if>
 public class ${className}ServiceImpl implements ${className}Service {
     
     private final ${className}Mapper ${className?uncap_first}Mapper;
+    
+    <#if !config.enableLombok>
+    public ${className}ServiceImpl(${className}Mapper ${className?uncap_first}Mapper) {
+        this.${className?uncap_first}Mapper = ${className?uncap_first}Mapper;
+    }
+    </#if>
     
     @Override
     public Page<${className}> queryPage(Long current, Long size) {

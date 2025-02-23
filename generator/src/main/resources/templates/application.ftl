@@ -1,12 +1,12 @@
 server:
-  port: 80
+  port: 8080
 
 spring:
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/moments?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
-    username: root
-    password: root
+    driver-class-name: ${(dbType == 'mysql')?string('com.mysql.cj.jdbc.Driver', 'org.postgresql.Driver')}
+    url: ${url}
+    username: ${username}
+    password: ${password}
   
   # JSON 日期格式设置
   jackson:
@@ -18,10 +18,11 @@ mybatis-plus:
     # 打印 SQL 日志
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
+<#if config.enableKnife4j>
 
 # Knife4j 配置
 knife4j:
   enable: true
   setting:
     language: zh-CN
- 
+</#if> 
