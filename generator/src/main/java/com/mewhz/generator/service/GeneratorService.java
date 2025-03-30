@@ -74,7 +74,7 @@ public class GeneratorService {
                     databaseConfigDTO.getPassword());
 
             // 创建一个临时目录存放生成的文件
-            File tempDir = new File("temp_generated_code");
+            File tempDir = new File(databaseConfigDTO.getGeneratorConfig().getProjectName());
             tempDir.mkdir();
 
             // 获取数据库表结构信息并生成代码
@@ -104,7 +104,6 @@ public class GeneratorService {
     }
 
     private void generateCodeForTable(Table<?> table, File outputDir, DatabaseConfigDTO databaseConfigDTO) throws IOException {
-
         GeneratorConfig config = databaseConfigDTO.getGeneratorConfig();
 
         // 获取表的所有列信息并转换类型
@@ -123,12 +122,16 @@ public class GeneratorService {
             columns.add(columnInfo);
         });
 
-        // 准备模板渲染所需的数据
-        String basePackage = "com.mewhz.demo";
+        // 使用配置中的项目名替换默认的 demo
+        String projectName = config.getProjectName() != null ? config.getProjectName() : "demo";
+        String basePackage = "com.mewhz." + projectName;
         String basePackagePath = basePackage.replace(".", "/");
-        
+        String applicationClassName = projectName.substring(0, 1).toUpperCase() + projectName.substring(1);
+
         Dict dict = Dict.create()
                 .set("package", basePackage)
+                .set("projectName", projectName)  // 添加项目名到模板变量
+                .set("applicationClassName", applicationClassName)
                 .set("className", convertToCamelCase(table.getName()))
                 .set("tableName", table.getName())
                 .set("columns", columns)
@@ -152,43 +155,56 @@ public class GeneratorService {
         templateConfig.put("result.ftl", "/common");
         templateConfig.put("application.ftl", "");  // 放在根目录
         templateConfig.put("application-class.ftl", "");  // 放在根包路径下
+        templateConfig.put("pom.ftl", "");
 
         // 生成所有需要的文件
         for (Map.Entry<String, String> entry : templateConfig.entrySet()) {
-            generateFile(engine, entry.getKey(), entry.getValue(), dict, table, outputDir, basePackagePath);
+            generateFile(engine, entry.getKey(), entry.getValue(), dict, table, outputDir, basePackagePath, applicationClassName);
         }
     }
 
     private void generateFile(TemplateEngine engine, String templateName, String packagePath, 
-                            Dict dict, Table<?> table, File outputDir, String basePackagePath) throws IOException {
+                            Dict dict, Table<?> table, File outputDir, String basePackagePath, String applicationClassName) throws IOException {
         Template template = engine.getTemplate(templateName);
         String result = template.render(dict);
 
-        String fileName = getFileName(templateName, table.getName());
+        String fileName = getFileName(templateName, table.getName(), applicationClassName);
         String targetDir;
         String targetFile;
         
         if (templateName.equals("application.ftl")) {
-            // 配置文件放在 resources 目录下
-            targetDir = outputDir.getPath() + File.separator + "resources";
+            // 配置文件放在 src/main/resources 目录下
+            targetDir = outputDir.getPath() + File.separator + "src" + File.separator + "main" + File.separator + "resources";
             targetFile = targetDir + File.separator + fileName + ".yml";
+        } else if (templateName.equals("pom.ftl")) {
+            // pom 放在根目录下
+            targetDir = outputDir.getPath();
+            targetFile = targetDir + File.separator + fileName + ".xml";
         } else {
-            // 其他Java文件放在对应包路径下
-            targetDir = outputDir.getPath() + File.separator + "java" + File.separator + basePackagePath + packagePath;
+            // Java文件放在 src/main/java/{package} 目录下
+            targetDir = outputDir.getPath() + File.separator + "src" + File.separator + "main" + File.separator + "java" 
+                     + File.separator + basePackagePath + packagePath;
             targetFile = targetDir + File.separator + fileName + ".java";
         }
         
+        // 创建目录
         new File(targetDir).mkdirs();
         
+        // 写入文件
         try (FileWriter writer = new FileWriter(targetFile)) {
             writer.write(result);
         }
     }
 
     private byte[] createZipFile(File sourceDir) throws IOException {
+        // 获取原始目录名
+        String originalName = sourceDir.getName();
+        // 创建新的目录名（如果需要）
+        String newName = originalName;
+        
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ZipOutputStream zos = new ZipOutputStream(baos)) {
-            zipDirectory(sourceDir, sourceDir.getName(), zos);
+            zipDirectory(sourceDir, newName, zos);
         }
         return baos.toByteArray();
     }
@@ -228,7 +244,7 @@ public class GeneratorService {
         directory.delete();
     }
 
-    private String getFileName(String templateName, String tableName) {
+    private String getFileName(String templateName, String tableName, String applicationClassName) {
         String fileName = convertToCamelCase(tableName);
         if (templateName.startsWith("service")) {
             if (templateName.contains("Impl")) {
@@ -243,7 +259,9 @@ public class GeneratorService {
         } else if (templateName.equals("application.ftl")) {
             fileName = "application";
         } else if (templateName.equals("application-class.ftl")) {
-            fileName = "DemoApplication";
+            fileName = applicationClassName + "Application";
+        } else if (templateName.equals("pom.ftl")) {
+            fileName = "pom";
         } else if (!templateName.equals("model.ftl")) {
             fileName += templateName.substring(0, templateName.indexOf(".")).substring(0, 1).toUpperCase() 
                     + templateName.substring(0, templateName.indexOf(".")).substring(1);

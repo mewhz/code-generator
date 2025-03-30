@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import com.mewhz.generator.service.GeneratorService;
 import com.mewhz.generator.model.dto.DatabaseConfigDTO;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDateTime;
@@ -28,6 +29,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.Map;
 import java.util.HashMap;
+import java.io.UnsupportedEncodingException;
 
 @RequestMapping("/generator")
 @RestController
@@ -44,108 +46,101 @@ public class GeneratorController {
     @PostMapping("/generate")
     public ResponseEntity<byte[]> generateCode(@RequestBody DatabaseConfigDTO config) {
         byte[] zipFile = generatorService.generateCode(config);
-        
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        // 生成带时间戳的文件名
-        String timestamp = LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-        String fileName = String.format("generated-code-%s.zip", timestamp);
-        headers.setContentDispositionFormData("attachment", fileName);
-        
-        return new ResponseEntity<>(zipFile, headers, HttpStatus.OK);
+
+        return new ResponseEntity<>(zipFile, HttpStatus.OK);
     }
 
     @SneakyThrows
     @GetMapping("/")
-    public void generate() {
-        // 配置数据库连接信息
-        // 参数说明：数据库URL、用户名、密码，使用UTF-8编码，禁用SSL，使用UTC时区
-        String url = "jdbc:mysql://localhost:3306/moments?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC";
-        // 注册数据源，使用HikariCP连接池
-        DataSourceHolder.reg("crm",
-                "com.zaxxer.hikari.HikariDataSource",
-                "com.mysql.cj.jdbc.Driver",
-                url,
-                "root",
-                "root");
-
-        // 获取数据库表结构信息
-        Table<?> table = ServiceProxy.service("crm").metadata().table("operation_log");
-        // 获取表的所有列信息并转换类型
-        List<Dict> columns = new ArrayList<>();
-        table.getColumns().values().forEach(column -> {
-            Dict columnInfo = Dict.create()
-                    .set("name", toCamelCase(column.getName()))
-                    .set("javaType", getJavaType(column))
-                    .set("comment", column.getComment())
-                    .set("nullable", column.isNullable())
-                    .set("primaryKey", column.isPrimaryKey())
-                    .set("typeName", column.getTypeName());
-            columns.add(columnInfo);
-        });
-
-        // 准备模板渲染所需的数据
-        String basePackage = "com.mewhz.demo";
-        String basePackagePath = basePackage.replace(".", "/");
-        String outputPath = "C:/Document/project/code-generator/demo/src/main/java/" + basePackagePath;
-        
-        Dict dict = Dict.create()
-                .set("package", basePackage)
-                .set("className", convertToCamelCase(table.getName()))
-                .set("tableName", table.getName())
-                .set("columns", columns);
-
-        // 初始化模板引擎
-        TemplateEngine engine = TemplateUtil.createEngine(new TemplateConfig("templates", TemplateConfig.ResourceMode.CLASSPATH));
-
-        // 定义文件生成配置
-        Map<String, String> templateConfig = new HashMap<>();
-        templateConfig.put("model.ftl", "/model");
-        templateConfig.put("mapper.ftl", "/mapper");
-        templateConfig.put("service.ftl", "/service");
-        templateConfig.put("serviceImpl.ftl", "/service/impl");
-        templateConfig.put("controller.ftl", "/controller");
-        templateConfig.put("config.ftl", "/config");
-
-        // 生成所有需要的文件
-        for (Map.Entry<String, String> entry : templateConfig.entrySet()) {
-            String templateName = entry.getKey();
-            String packagePath = entry.getValue();
-            
-            // 生成文件内容
-            Template template = engine.getTemplate(templateName);
-            String result = template.render(dict);
-            
-            // 获取文件名（去掉.ftl后缀）
-            String fileName = convertToCamelCase(table.getName());
-            if (templateName.startsWith("service")) {
-                if (templateName.contains("Impl")) {
-                    fileName += "ServiceImpl";
-                } else {
-                    fileName += "Service";
-                }
-            } else if (templateName.equals("config.ftl")) {
-                fileName = "MybatisPlusConfig";  // 配置类使用固定名称
-            } else if (!templateName.equals("model.ftl")) {
-                fileName += templateName.substring(0, templateName.indexOf(".")).substring(0, 1).toUpperCase() 
-                        + templateName.substring(0, templateName.indexOf(".")).substring(1);
-            }
-            
-            // 创建目标目录
-            String targetDir = outputPath + packagePath;
-            File dir = new File(targetDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-            
-            // 写入文件
-            String targetFile = targetDir + "/" + fileName + ".java";
-            FileWriter writer = new FileWriter(targetFile);
-            writer.write(result);
-            writer.close();
-            System.out.println("Generated: " + targetFile);
-        }
-    }
+//    public void generate() {
+//        // 配置数据库连接信息
+//        // 参数说明：数据库URL、用户名、密码，使用UTF-8编码，禁用SSL，使用UTC时区
+//        String url = "jdbc:mysql://localhost:3306/moments?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC";
+//        // 注册数据源，使用HikariCP连接池
+//        DataSourceHolder.reg("crm",
+//                "com.zaxxer.hikari.HikariDataSource",
+//                "com.mysql.cj.jdbc.Driver",
+//                url,
+//                "root",
+//                "root");
+//
+//        // 获取数据库表结构信息
+//        Table<?> table = ServiceProxy.service("crm").metadata().table("operation_log");
+//        // 获取表的所有列信息并转换类型
+//        List<Dict> columns = new ArrayList<>();
+//        table.getColumns().values().forEach(column -> {
+//            Dict columnInfo = Dict.create()
+//                    .set("name", toCamelCase(column.getName()))
+//                    .set("javaType", getJavaType(column))
+//                    .set("comment", column.getComment())
+//                    .set("nullable", column.isNullable())
+//                    .set("primaryKey", column.isPrimaryKey())
+//                    .set("typeName", column.getTypeName());
+//            columns.add(columnInfo);
+//        });
+//
+//        // 准备模板渲染所需的数据
+//        String basePackage = "com.mewhz.demo";
+//        String basePackagePath = basePackage.replace(".", "/");
+//        String outputPath = "C:/Document/project/code-generator/demo/src/main/java/" + basePackagePath;
+//
+//        Dict dict = Dict.create()
+//                .set("package", basePackage)
+//                .set("className", convertToCamelCase(table.getName()))
+//                .set("tableName", table.getName())
+//                .set("columns", columns);
+//
+//        // 初始化模板引擎
+//        TemplateEngine engine = TemplateUtil.createEngine(new TemplateConfig("templates", TemplateConfig.ResourceMode.CLASSPATH));
+//
+//        // 定义文件生成配置
+//        Map<String, String> templateConfig = new HashMap<>();
+//        templateConfig.put("model.ftl", "/model");
+//        templateConfig.put("mapper.ftl", "/mapper");
+//        templateConfig.put("service.ftl", "/service");
+//        templateConfig.put("serviceImpl.ftl", "/service/impl");
+//        templateConfig.put("controller.ftl", "/controller");
+//        templateConfig.put("config.ftl", "/config");
+//
+//        // 生成所有需要的文件
+//        for (Map.Entry<String, String> entry : templateConfig.entrySet()) {
+//            String templateName = entry.getKey();
+//            String packagePath = entry.getValue();
+//
+//            // 生成文件内容
+//            Template template = engine.getTemplate(templateName);
+//            String result = template.render(dict);
+//
+//            // 获取文件名（去掉.ftl后缀）
+//            String fileName = convertToCamelCase(table.getName());
+//            if (templateName.startsWith("service")) {
+//                if (templateName.contains("Impl")) {
+//                    fileName += "ServiceImpl";
+//                } else {
+//                    fileName += "Service";
+//                }
+//            } else if (templateName.equals("config.ftl")) {
+//                fileName = "MybatisPlusConfig";  // 配置类使用固定名称
+//            } else if (!templateName.equals("model.ftl")) {
+//                fileName += templateName.substring(0, templateName.indexOf(".")).substring(0, 1).toUpperCase()
+//                        + templateName.substring(0, templateName.indexOf(".")).substring(1);
+//            }
+//
+//            // 创建目标目录
+//            String targetDir = outputPath + packagePath;
+//            File dir = new File(targetDir);
+//            if (!dir.exists()) {
+//                dir.mkdirs();
+//            }
+//
+//            // 写入文件
+//            String targetFile = targetDir + "/" + fileName + ".java";
+//            FileWriter writer = new FileWriter(targetFile);
+//            writer.write(result);
+//            writer.close();
+//            System.out.println("Generated: " + targetFile);
+//        }
+//    }
 
     /**
      * 将下划线分隔的表名转换为驼峰命名格式

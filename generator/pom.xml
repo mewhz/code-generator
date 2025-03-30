@@ -31,6 +31,7 @@
             <artifactId>mysql-connector-j</artifactId>
             <scope>runtime</scope>
         </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -55,11 +56,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.anyline</groupId>
             <artifactId>anyline-environment-spring-data-jdbc</artifactId>
         </dependency>
@@ -67,6 +63,11 @@
         <dependency>
             <groupId>org.anyline</groupId>
             <artifactId>anyline-data-jdbc-mysql</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
 
     </dependencies>

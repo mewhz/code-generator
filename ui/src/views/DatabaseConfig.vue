@@ -121,12 +121,12 @@ interface DatabaseConfig {
 const formData = reactive({
   dbType: 'mysql',
   url: '',
-  username: '',
-  password: '',
+  username: 'root',
+  password: 'root',
   tables: [] as string[],
   host: 'localhost',
   port: '3306',
-  database: '',
+  database: 'seed_mall',
 })
 
 const tableList = ref<string[]>([])
@@ -183,6 +183,7 @@ const onSubmit = async () => {
         // 从本地存储获取生成器配置
         const savedConfig = localStorage.getItem('generator-config')
         const generatorConfig = savedConfig ? JSON.parse(savedConfig) : {
+          projectName: 'demo',
           enableLombok: true,
           enableKnife4j: false,
           enableValidation: false,
@@ -206,11 +207,42 @@ const onSubmit = async () => {
           generatorConfig
         }
 
-        const response = await axios.post('/api/generator/generate', finalConfig);
+        // 使用 axios 发送请求并指定 responseType 为 blob
+        const response = await axios.post('/api/generator/generate', finalConfig, {
+          responseType: 'blob'
+        });
+
+        // 创建 Blob 对象并下载
+        const blob = new Blob([response.data], { type: 'application/zip' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${generatorConfig.projectName}.zip`;
+        
+        // 添加到文档中并触发点击
+        document.body.appendChild(link);
+        link.click();
+        
+        // 清理
+        setTimeout(() => {
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        }, 0);
 
         ElMessage.success('代码生成成功')
       } catch (error: any) {
-        ElMessage.error('代码生成失败：' + (error.response?.data?.message || error.message))
+        // 对于二进制响应的错误处理
+        if (error.response?.data instanceof Blob) {
+          try {
+            const text = await new Response(error.response.data).text();
+            const errorData = JSON.parse(text);
+            ElMessage.error('代码生成失败：' + (errorData.message || '未知错误'));
+          } catch (e) {
+            ElMessage.error('代码生成失败：' + error.message);
+          }
+        } else {
+          ElMessage.error('代码生成失败：' + (error.response?.data?.message || error.message));
+        }
       }
     }
   })

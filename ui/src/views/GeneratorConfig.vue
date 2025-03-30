@@ -17,6 +17,14 @@
             label-width="120px"
             status-icon
           >
+            <el-form-item label="项目名称" prop="projectName">
+              <el-input 
+                v-model="formData.projectName" 
+                placeholder="请输入项目名称，例如：demo"
+                style="width: 300px"
+              />
+            </el-form-item>
+
             <el-row :gutter="20">
               <el-col :span="6">
                 <el-form-item label="Lombok">
@@ -73,6 +81,7 @@ const formRef = ref<FormInstance>()
 const STORAGE_KEY = 'generator-config'
 
 const defaultFormData = {
+  projectName: 'demo',
   enableLombok: true,
   enableKnife4j: false,
   enableValidation: false,

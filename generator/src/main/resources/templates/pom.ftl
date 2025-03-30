@@ -3,23 +3,21 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- 添加父模块引用 -->
-    <parent>
-        <groupId>com.mewhz</groupId>
-        <artifactId>code-generator</artifactId>
-        <version>1.1.0</version>
-    </parent>
-
-    <artifactId>demo</artifactId>
-    <name>demo</name>
-    <description>demo</description>
+    <groupId>com.mewhz</groupId>
+    <artifactId>${projectName}</artifactId>
+    <version>1.0.0</version>
+    <name>${projectName}</name>
+    <description>${projectName}</description>
 
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-boot.version>2.6.13</spring-boot.version>
+        <mybatis-plus.version>3.5.7</mybatis-plus.version>
+        <knife4j.version>4.4.0</knife4j.version>
     </properties>
+    
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -31,46 +29,38 @@
             <artifactId>mysql-connector-j</artifactId>
             <scope>runtime</scope>
         </dependency>
+        
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+        
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.freemarker/freemarker -->
-        <dependency>
-            <groupId>org.freemarker</groupId>
-            <artifactId>freemarker</artifactId>
-        </dependency>
-
-        <!-- 移除版本号，使用父模块统一管理的版本 -->
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-all</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version><#noparse>${mybatis-plus.version}</#noparse></version>
         </dependency>
 
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
+            <version><#noparse>${knife4j.version}</#noparse></version>
         </dependency>
-
     </dependencies>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
+                <version><#noparse>${spring-boot.version}</#noparse></version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -92,9 +82,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring-boot.version}</version>
+                <version>2.6.13</version>
                 <configuration>
-                    <mainClass>com.mewhz.demo.DemoApplication</mainClass>
+                    <mainClass>${package}.${applicationClassName}Application</mainClass>
                 </configuration>
                 <executions>
                     <execution>
@@ -108,4 +98,4 @@
         </plugins>
     </build>
 
-</project>
+</project> 
