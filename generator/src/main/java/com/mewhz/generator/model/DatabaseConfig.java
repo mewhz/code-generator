@@ -1,10 +1,11 @@
-package com.mewhz.generator.model.dto;
+package com.mewhz.generator.model;
 
 import lombok.Data;
+
 import java.util.List;
 
 @Data
-public class DatabaseConfigDTO {
+public class DatabaseConfig {
     private String dbType;
     private String url;
     private String username;

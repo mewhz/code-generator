@@ -31,7 +31,7 @@
                           :popper-class="'db-type-select-dropdown'"
                         >
                           <el-option label="MySQL" value="mysql" />
-                          <el-option label="PostgreSQL" value="postgresql" />
+                          <!-- <el-option label="PostgreSQL" value="postgresql" /> -->
                         </el-select>
                       </template>
                     </el-input>
@@ -186,7 +186,7 @@ const onSubmit = async () => {
           projectName: 'demo',
           enableLombok: true,
           enableKnife4j: false,
-          enableValidation: false,
+          // enableValidation: false,
           enableResult: true
         }
         
@@ -208,7 +208,7 @@ const onSubmit = async () => {
         }
 
         // 使用 axios 发送请求并指定 responseType 为 blob
-        const response = await axios.post('/api/generator/generate', finalConfig, {
+        const response = await axios.post('/generator/generate', finalConfig, {
           responseType: 'blob'
         });
 
@@ -265,7 +265,7 @@ const testConnection = async () => {
       database: formData.database,
     }
 
-    const response = await axios.post('/api/generator/test-connection', config)
+    const response = await axios.post('/generator/test-connection', config)
     formData.tables = []
     tableList.value = response.data
     ElMessage.success(`数据库连接成功，获取到 ${tableList.value.length} 个表`)

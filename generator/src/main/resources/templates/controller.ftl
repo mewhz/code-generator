@@ -71,12 +71,20 @@ public class ${className}Controller {
     <#if config.enableKnife4j>
     @Operation(summary = "根据ID查询")
     </#if>
+    <#if config.enableResult>
     public Result<${className}> queryById(
+    <#else>
+    public ${className} queryById(
+    </#if>
             <#if config.enableKnife4j>
             @Parameter(description = "ID") 
             </#if>
             @PathVariable Long id) {
+        <#if config.enableResult>
         return Result.success(${className?uncap_first}Service.queryById(id));
+        <#else>
+        return ${className?uncap_first}Service.queryById(id);
+        </#if>
     }
 
     /**
@@ -86,12 +94,20 @@ public class ${className}Controller {
     <#if config.enableKnife4j>
     @Operation(summary = "新增数据")
     </#if>
+    <#if config.enableResult>
     public Result<Boolean> insert(
+    <#else>
+    public Boolean insert(
+    </#if>
             <#if config.enableKnife4j>
             @Parameter(description = "实体对象") 
             </#if>
             @RequestBody ${className} ${className?uncap_first}) {
+        <#if config.enableResult>
         return Result.success(${className?uncap_first}Service.insert(${className?uncap_first}));
+        <#else>
+        return ${className?uncap_first}Service.insert(${className?uncap_first});
+        </#if>
     }
 
     /**
@@ -101,12 +117,20 @@ public class ${className}Controller {
     <#if config.enableKnife4j>
     @Operation(summary = "修改数据")
     </#if>
+    <#if config.enableResult>
     public Result<Boolean> update(
+    <#else>
+    public Boolean update(
+    </#if>
             <#if config.enableKnife4j>
             @Parameter(description = "实体对象") 
             </#if>
             @RequestBody ${className} ${className?uncap_first}) {
+        <#if config.enableResult>
         return Result.success(${className?uncap_first}Service.update(${className?uncap_first}));
+        <#else>
+        return ${className?uncap_first}Service.update(${className?uncap_first});
+        </#if>
     }
 
     /**
@@ -116,11 +140,19 @@ public class ${className}Controller {
     <#if config.enableKnife4j>
     @Operation(summary = "删除数据")
     </#if>
+    <#if config.enableResult>
     public Result<Boolean> delete(
+    <#else>
+    public Boolean delete(
+    </#if>
             <#if config.enableKnife4j>
             @Parameter(description = "ID") 
             </#if>
             @PathVariable Long id) {
+        <#if config.enableResult>
         return Result.success(${className?uncap_first}Service.delete(id));
+        <#else>
+        return ${className?uncap_first}Service.delete(id);
+        </#if>
     }
 } 

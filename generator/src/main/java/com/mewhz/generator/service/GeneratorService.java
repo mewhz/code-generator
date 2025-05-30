@@ -5,17 +5,20 @@ import cn.hutool.extra.template.Template;
 import cn.hutool.extra.template.TemplateConfig;
 import cn.hutool.extra.template.TemplateEngine;
 import cn.hutool.extra.template.TemplateUtil;
-import com.mewhz.generator.model.dto.GeneratorConfig;
+import com.mewhz.generator.model.DatabaseConfig;
+import com.mewhz.generator.model.GeneratorConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.datasource.DataSourceHolder;
 import org.anyline.metadata.Column;
 import org.anyline.metadata.Table;
 import org.anyline.proxy.ServiceProxy;
 import org.springframework.stereotype.Service;
-import com.mewhz.generator.model.dto.DatabaseConfigDTO;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -26,7 +29,7 @@ public class GeneratorService {
     /**
      * 测试数据库连接并获取所有表信息
      */
-    public List<String> testConnection(DatabaseConfigDTO config) {
+    public List<String> testConnection(DatabaseConfig config) {
         String tempDataSource = "temp_" + System.currentTimeMillis();
         try {
             // 注册数据源
@@ -62,25 +65,25 @@ public class GeneratorService {
     /**
      * 生成代码并返回ZIP文件的字节数组
      */
-    public byte[] generateCode(DatabaseConfigDTO databaseConfigDTO) {
+    public byte[] generateCode(DatabaseConfig databaseConfig) {
         String tempDataSource = "temp_" + System.currentTimeMillis();
         try {
             // 注册数据源
             DataSourceHolder.reg(tempDataSource,
                     "com.zaxxer.hikari.HikariDataSource",
                     "com.mysql.cj.jdbc.Driver",
-                    databaseConfigDTO.getUrl(),
-                    databaseConfigDTO.getUsername(),
-                    databaseConfigDTO.getPassword());
+                    databaseConfig.getUrl(),
+                    databaseConfig.getUsername(),
+                    databaseConfig.getPassword());
 
             // 创建一个临时目录存放生成的文件
-            File tempDir = new File(databaseConfigDTO.getGeneratorConfig().getProjectName());
+            File tempDir = new File(databaseConfig.getGeneratorConfig().getProjectName());
             tempDir.mkdir();
 
             // 获取数据库表结构信息并生成代码
-            for (String tableName : databaseConfigDTO.getTables()) {
+            for (String tableName : databaseConfig.getTables()) {
                 Table<?> table = ServiceProxy.service(tempDataSource).metadata().table(tableName);
-                generateCodeForTable(table, tempDir, databaseConfigDTO);
+                generateCodeForTable(table, tempDir, databaseConfig);
             }
 
             // 将生成的文件打包成ZIP
@@ -103,8 +106,8 @@ public class GeneratorService {
         }
     }
 
-    private void generateCodeForTable(Table<?> table, File outputDir, DatabaseConfigDTO databaseConfigDTO) throws IOException {
-        GeneratorConfig config = databaseConfigDTO.getGeneratorConfig();
+    private void generateCodeForTable(Table<?> table, File outputDir, DatabaseConfig databaseConfig) throws IOException {
+        GeneratorConfig config = databaseConfig.getGeneratorConfig();
 
         // 获取表的所有列信息并转换类型
         List<Dict> columns = new ArrayList<>();
@@ -124,7 +127,8 @@ public class GeneratorService {
 
         // 使用配置中的项目名替换默认的 demo
         String projectName = config.getProjectName() != null ? config.getProjectName() : "demo";
-        String basePackage = "com.mewhz." + projectName;
+//        String basePackage = "com.mewhz." + projectName;
+        String basePackage = config.getPackageName() != null ? config.getPackageName() : "com.code";
         String basePackagePath = basePackage.replace(".", "/");
         String applicationClassName = projectName.substring(0, 1).toUpperCase() + projectName.substring(1);
 
@@ -136,10 +140,10 @@ public class GeneratorService {
                 .set("tableName", table.getName())
                 .set("columns", columns)
                 .set("config", config)
-                .set("dbType", databaseConfigDTO.getDbType())
-                .set("url", databaseConfigDTO.getUrl())
-                .set("username", databaseConfigDTO.getUsername())
-                .set("password", databaseConfigDTO.getPassword());
+                .set("dbType", databaseConfig.getDbType())
+                .set("url", databaseConfig.getUrl())
+                .set("username", databaseConfig.getUsername())
+                .set("password", databaseConfig.getPassword());
 
         // 初始化模板引擎
         TemplateEngine engine = TemplateUtil.createEngine(new TemplateConfig("templates", TemplateConfig.ResourceMode.CLASSPATH));

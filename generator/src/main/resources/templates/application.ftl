@@ -3,7 +3,8 @@ server:
 
 spring:
   datasource:
-    driver-class-name: ${(dbType == 'mysql')?string('com.mysql.cj.jdbc.Driver', 'org.postgresql.Driver')}
+<#--    driver-class-name: ${(dbType == 'mysql')?string('com.mysql.cj.jdbc.Driver', 'org.postgresql.Driver')}-->
+    driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${url}
     username: ${username}
     password: ${password}

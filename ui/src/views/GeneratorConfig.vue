@@ -25,6 +25,14 @@
               />
             </el-form-item>
 
+            <el-form-item label="项目包名" prop="packageName">
+              <el-input 
+                v-model="formData.packageName" 
+                placeholder="请输入项目包名，例如：com.code"
+                style="width: 300px"
+              />
+            </el-form-item>
+
             <el-row :gutter="20">
               <el-col :span="6">
                 <el-form-item label="Lombok">
@@ -40,13 +48,13 @@
                   />
                 </el-form-item>
               </el-col>
-              <el-col :span="6">
+              <!-- <el-col :span="6">
                 <el-form-item label="数据校验">
                   <el-switch
                     v-model="formData.enableValidation"
                   />
                 </el-form-item>
-              </el-col>
+              </el-col> -->
               <el-col :span="6">
                 <el-form-item label="Result">
                   <el-switch
@@ -82,9 +90,10 @@ const STORAGE_KEY = 'generator-config'
 
 const defaultFormData = {
   projectName: 'demo',
+  packageName: 'com.code',
   enableLombok: true,
   enableKnife4j: false,
-  enableValidation: false,
+  // enableValidation: false,
   enableResult: true
 }
 
