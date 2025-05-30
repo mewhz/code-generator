@@ -1,3 +1,8 @@
+### 项目目录
+
+>├─generator	# 后端
+>└─ui			 # 前端 
+
 ### 项目运行
 
 ```bash
@@ -9,8 +14,8 @@ pnpm run dev
 后端放入 IDEA 中，下载依赖后运行
 
 ```bash
-# jar 包
-java -jar generator-1.3.1.jar
+# jar 包内包含前端与后端，可直接通过命令运行使用
+java -jar generator.jar
 ```
 
 ### 页面截图
