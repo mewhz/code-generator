@@ -1,10 +1,10 @@
 ### 项目目录
 
+``` lua
 code-generator
-
-├─generator	-- 后端
-
-└─ui	  	-- 前端 
+├── generator -- 后端
+└── ui        -- 前端
+```
 
 ### 项目运行
 
