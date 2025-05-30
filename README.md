@@ -8,17 +8,16 @@ pnpm run dev
 
 后端放入 IDEA 中，下载依赖后运行
 
-jar 包
-
 ```bash
+# jar 包
 java -jar generator-1.3.1.jar
 ```
 
 ### 页面截图
 
-![image-20250530175715622](C:/Document/GitHub/code-generator/README.assets/image-20250530175715622.png)
+![image-20250530175715622](README.assets/image-20250530175715622.png)
 
-![image-20250530175657610](C:/Document/GitHub/code-generator/README.assets/image-20250530175657610.png)
+![image-20250530175657610](README.assets/image-20250530175657610.png)
 
 ### 更新记录
 
