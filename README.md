@@ -1,7 +1,8 @@
 ### 项目目录
 
->├─generator	# 后端
->└─ui			 # 前端 
+code-generator
+├─generator	-- 后端
+└─ui	  	-- 前端 
 
 ### 项目运行
 
