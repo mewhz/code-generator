@@ -26,39 +26,45 @@
             </el-form-item>
 
             <el-form-item label="项目包名" prop="packageName">
-              <el-input 
-                v-model="formData.packageName" 
-                placeholder="请输入项目包名，例如：com.code"
-                style="width: 300px"
-              />
+              <el-row :gutter="10">
+                <el-col :span="18">
+                  <el-input 
+                    v-model="formData.packageName" 
+                    placeholder="请输入项目包名，例如：com.code"
+                  />
+                </el-col>
+                <el-col :span="6">
+                  <el-checkbox v-model="formData.enablePackagePath">生成包路径</el-checkbox>
+                </el-col>
+              </el-row>
             </el-form-item>
 
             <el-row :gutter="20">
-              <el-col :span="6">
+              <el-col :span="4">
                 <el-form-item label="Lombok">
                   <el-switch
                     v-model="formData.enableLombok"
                   />
                 </el-form-item>
               </el-col>
-              <el-col :span="6">
-                <el-form-item label="Knife4j">
+              <el-col :span="4">
+                <el-form-item label="开箱即用">
                   <el-switch
-                    v-model="formData.enableKnife4j"
+                    v-model="formData.enableReadyToUse"
                   />
                 </el-form-item>
               </el-col>
-              <!-- <el-col :span="6">
-                <el-form-item label="数据校验">
-                  <el-switch
-                    v-model="formData.enableValidation"
-                  />
-                </el-form-item>
-              </el-col> -->
-              <el-col :span="6">
+              <el-col :span="4">
                 <el-form-item label="Result">
                   <el-switch
                     v-model="formData.enableResult"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="4">
+                <el-form-item label="Knife4j">
+                  <el-switch
+                    v-model="formData.enableKnife4j"
                   />
                 </el-form-item>
               </el-col>
@@ -91,10 +97,11 @@ const STORAGE_KEY = 'generator-config'
 const defaultFormData = {
   projectName: 'demo',
   packageName: 'com.code',
+  enablePackagePath: true,
   enableLombok: true,
   enableKnife4j: false,
-  // enableValidation: false,
-  enableResult: true
+  enableResult: true,
+  enableReadyToUse: true
 }
 
 const formData = reactive({

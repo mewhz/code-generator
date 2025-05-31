@@ -127,10 +127,11 @@ public class GeneratorService {
 
         // 使用配置中的项目名替换默认的 demo
         String projectName = config.getProjectName() != null ? config.getProjectName() : "demo";
-//        String basePackage = "com.mewhz." + projectName;
         String basePackage = config.getPackageName() != null ? config.getPackageName() : "com.code";
-        String basePackagePath = basePackage.replace(".", "/");
         String applicationClassName = projectName.substring(0, 1).toUpperCase() + projectName.substring(1);
+        String basePackagePath = "";
+
+        if (config.getEnablePackagePath())  basePackagePath = basePackage.replace(".", "/");
 
         Dict dict = Dict.create()
                 .set("package", basePackage)
@@ -155,11 +156,17 @@ public class GeneratorService {
         templateConfig.put("service.ftl", "/service");
         templateConfig.put("serviceImpl.ftl", "/service/impl");
         templateConfig.put("controller.ftl", "/controller");
-        templateConfig.put("config.ftl", "/config");
-        templateConfig.put("result.ftl", "/common");
-        templateConfig.put("application.ftl", "");  // 放在根目录
-        templateConfig.put("application-class.ftl", "");  // 放在根包路径下
-        templateConfig.put("pom.ftl", "");
+
+        if (config.getEnableResult()) templateConfig.put("result.ftl", "/common");
+
+        if (config.getEnableReadyToUse()) {
+
+            templateConfig.put("config.ftl", "/config");
+            templateConfig.put("application.ftl", "");  // 放在根目录
+            templateConfig.put("application-class.ftl", "");  // 放在根包路径下
+            templateConfig.put("pom.ftl", "");
+
+        }
 
         // 生成所有需要的文件
         for (Map.Entry<String, String> entry : templateConfig.entrySet()) {
