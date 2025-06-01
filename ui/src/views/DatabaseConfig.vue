@@ -92,14 +92,22 @@
       </el-main>
       
       <el-footer>
-        <p>Copyright © 2025 Code Generator</p>
+        <p class="footer-text">
+          © 2025 
+          <a 
+            href="https://github.com/mewhz/code-generator" 
+            target="_blank" 
+            class="footer-link"
+          >Code Generator</a>
+          <span class="footer-version">v1.3.3</span>
+        </p>
       </el-footer>
     </el-container>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
@@ -129,8 +137,6 @@ const formData = reactive({
   database: 'seed_mall',
 })
 
-const tableList = ref<string[]>([])
-
 const rules = reactive<FormRules>({
   host: [
     { required: true, message: '请输入主机地址', trigger: 'blur' }
@@ -155,6 +161,13 @@ const rules = reactive<FormRules>({
 })
 
 const loading = ref(false)
+const STORAGE_KEY = 'database-table-list'
+const tableList = ref<string[]>([])
+
+onMounted(() => {
+  if (localStorage.getItem(STORAGE_KEY)) 
+    tableList.value = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+})
 
 const updateUrl = () => {
   const { dbType, host, port, database } = formData
@@ -268,6 +281,7 @@ const testConnection = async () => {
     const response = await axios.post('/api/generator/test-connection', config)
     formData.tables = []
     tableList.value = response.data
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tableList.value))
     ElMessage.success(`数据库连接成功，获取到 ${tableList.value.length} 个表`)
   } catch (error: any) {
     tableList.value = []
@@ -282,6 +296,7 @@ const resetForm = () => {
   if (!formRef.value) return
   formRef.value.resetFields()
   tableList.value = [];
+  localStorage.removeItem(STORAGE_KEY)
 }
 </script>
 
@@ -488,5 +503,25 @@ const resetForm = () => {
   font-size: 16px;
   font-weight: 500;
   color: #606266;
+}
+
+.footer-text {
+  color: #909399;
+  font-size: 14px;
+}
+.footer-link {
+  color: #409EFF;
+  text-decoration: none;
+  font-weight: 500;
+  margin: 0 4px;
+  transition: color 0.2s;
+}
+.footer-link:hover {
+  color: #66b1ff;
+}
+.footer-version {
+  margin-left: 8px;
+  color: #bbb;
+  font-size: 13px;
 }
 </style> 

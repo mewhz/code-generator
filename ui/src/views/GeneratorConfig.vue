@@ -21,7 +21,7 @@
               <el-input 
                 v-model="formData.projectName" 
                 placeholder="请输入项目名称，例如：demo"
-                style="width: 300px"
+                style="width: 315px"
               />
             </el-form-item>
 

@@ -30,6 +30,7 @@ public class GeneratorService {
      * 测试数据库连接并获取所有表信息
      */
     public List<String> testConnection(DatabaseConfig config) {
+
         String tempDataSource = "temp_" + System.currentTimeMillis();
         try {
             // 注册数据源
@@ -104,9 +105,11 @@ public class GeneratorService {
                 log.error("关闭数据源失败", e);
             }
         }
+
     }
 
     private void generateCodeForTable(Table<?> table, File outputDir, DatabaseConfig databaseConfig) throws IOException {
+
         GeneratorConfig config = databaseConfig.getGeneratorConfig();
 
         // 获取表的所有列信息并转换类型
@@ -170,22 +173,28 @@ public class GeneratorService {
 
         // 生成所有需要的文件
         for (Map.Entry<String, String> entry : templateConfig.entrySet()) {
-            generateFile(engine, entry.getKey(), entry.getValue(), dict, table, outputDir, basePackagePath, applicationClassName);
+            generateFile(engine, entry.getKey(), entry.getValue(), dict, table, outputDir, basePackagePath, applicationClassName, config);
         }
+
     }
 
-    private void generateFile(TemplateEngine engine, String templateName, String packagePath, 
-                            Dict dict, Table<?> table, File outputDir, String basePackagePath, String applicationClassName) throws IOException {
+    private void generateFile(TemplateEngine engine, String templateName, String packagePath,
+                              Dict dict, Table<?> table, File outputDir, String basePackagePath,
+                              String applicationClassName, GeneratorConfig config) throws IOException {
+
         Template template = engine.getTemplate(templateName);
         String result = template.render(dict);
 
         String fileName = getFileName(templateName, table.getName(), applicationClassName);
         String targetDir;
         String targetFile;
+        String srcMainDir = "";
+
+        if (config.getEnablePackagePath()) srcMainDir =  "src" + File.separator + "main" + File.separator;
         
         if (templateName.equals("application.ftl")) {
             // 配置文件放在 src/main/resources 目录下
-            targetDir = outputDir.getPath() + File.separator + "src" + File.separator + "main" + File.separator + "resources";
+            targetDir = outputDir.getPath() + File.separator + srcMainDir + "resources";
             targetFile = targetDir + File.separator + fileName + ".yml";
         } else if (templateName.equals("pom.ftl")) {
             // pom 放在根目录下
@@ -193,8 +202,7 @@ public class GeneratorService {
             targetFile = targetDir + File.separator + fileName + ".xml";
         } else {
             // Java文件放在 src/main/java/{package} 目录下
-            targetDir = outputDir.getPath() + File.separator + "src" + File.separator + "main" + File.separator + "java" 
-                     + File.separator + basePackagePath + packagePath;
+            targetDir = outputDir.getPath() + File.separator + srcMainDir + "java" + File.separator + basePackagePath + packagePath;
             targetFile = targetDir + File.separator + fileName + ".java";
         }
         
@@ -205,9 +213,11 @@ public class GeneratorService {
         try (FileWriter writer = new FileWriter(targetFile)) {
             writer.write(result);
         }
+
     }
 
     private byte[] createZipFile(File sourceDir) throws IOException {
+
         // 获取原始目录名
         String originalName = sourceDir.getName();
         // 创建新的目录名（如果需要）
@@ -218,9 +228,11 @@ public class GeneratorService {
             zipDirectory(sourceDir, newName, zos);
         }
         return baos.toByteArray();
+
     }
 
     private void zipDirectory(File folder, String parentFolder, ZipOutputStream zos) throws IOException {
+
         for (File file : folder.listFiles()) {
             if (file.isDirectory()) {
                 zipDirectory(file, parentFolder + "/" + file.getName(), zos);
@@ -239,9 +251,11 @@ public class GeneratorService {
             }
             zos.closeEntry();
         }
+
     }
 
     private void deleteDirectory(File directory) {
+
         File[] files = directory.listFiles();
         if (files != null) {
             for (File file : files) {
@@ -253,9 +267,11 @@ public class GeneratorService {
             }
         }
         directory.delete();
+
     }
 
     private String getFileName(String templateName, String tableName, String applicationClassName) {
+
         String fileName = convertToCamelCase(tableName);
         if (templateName.startsWith("service")) {
             if (templateName.contains("Impl")) {
@@ -278,6 +294,7 @@ public class GeneratorService {
                     + templateName.substring(0, templateName.indexOf(".")).substring(1);
         }
         return fileName;
+
     }
 
     /**
@@ -285,6 +302,7 @@ public class GeneratorService {
      * 例如：user_info -> UserInfo
      */
     private String convertToCamelCase(String tableName) {
+
         StringBuilder result = new StringBuilder();
         boolean nextUpper = true;
 
@@ -302,12 +320,14 @@ public class GeneratorService {
         }
 
         return result.toString();
+
     }
 
     /**
      * 根据列信息获取对应的Java类型
      */
     private String getJavaType(Column column) {
+
         String type = column.getTypeName().toLowerCase();
         
         if (type.contains("varchar") || type.contains("text") || type.contains("char")) {
@@ -330,6 +350,7 @@ public class GeneratorService {
             return "Double";
         }
         return "String";  // 默认使用String类型
+
     }
 
     /**
@@ -337,6 +358,7 @@ public class GeneratorService {
      * 例如：user_name -> userName
      */
     private String toCamelCase(String name) {
+
         StringBuilder result = new StringBuilder();
         boolean nextUpper = false;
 
@@ -355,5 +377,6 @@ public class GeneratorService {
         }
 
         return result.toString();
+
     }
 }
