@@ -126,15 +126,15 @@ interface DatabaseConfig {
   database: string
 }
 
-const formData = reactive({
+let formData = reactive({
   dbType: 'mysql',
   url: '',
   username: 'root',
-  password: 'root',
+  password: '',
   tables: [] as string[],
   host: 'localhost',
   port: '3306',
-  database: 'seed_mall',
+  database: '',
 })
 
 const rules = reactive<FormRules>({
@@ -162,11 +162,14 @@ const rules = reactive<FormRules>({
 
 const loading = ref(false)
 const STORAGE_KEY = 'database-table-list'
+const FORM_DATA_KEY = 'database-form-data'
 const tableList = ref<string[]>([])
 
 onMounted(() => {
   if (localStorage.getItem(STORAGE_KEY)) 
     tableList.value = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+  if (localStorage.getItem(FORM_DATA_KEY)) 
+    Object.assign(formData, JSON.parse(localStorage.getItem(FORM_DATA_KEY) || '{}'))
 })
 
 const updateUrl = () => {
@@ -282,6 +285,7 @@ const testConnection = async () => {
     formData.tables = []
     tableList.value = response.data
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tableList.value))
+    localStorage.setItem(FORM_DATA_KEY, JSON.stringify(formData))
     ElMessage.success(`数据库连接成功，获取到 ${tableList.value.length} 个表`)
   } catch (error: any) {
     tableList.value = []
@@ -295,8 +299,8 @@ const testConnection = async () => {
 const resetForm = () => {
   if (!formRef.value) return
   formRef.value.resetFields()
+  localStorage.setItem(FORM_DATA_KEY, JSON.stringify(formData))
   tableList.value = [];
-  localStorage.removeItem(STORAGE_KEY)
 }
 </script>
 

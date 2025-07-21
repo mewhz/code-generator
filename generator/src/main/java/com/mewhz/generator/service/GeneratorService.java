@@ -15,6 +15,9 @@ import org.anyline.proxy.ServiceProxy;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -209,8 +212,8 @@ public class GeneratorService {
         // 创建目录
         new File(targetDir).mkdirs();
         
-        // 写入文件
-        try (FileWriter writer = new FileWriter(targetFile)) {
+        // 写入文件并设置 UTF-8 字符编码
+        try (Writer writer = new OutputStreamWriter(Files.newOutputStream(Paths.get(targetFile)), StandardCharsets.UTF_8)) {
             writer.write(result);
         }
 
